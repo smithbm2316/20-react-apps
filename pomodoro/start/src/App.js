@@ -1,22 +1,60 @@
-import React from 'react';
-import './App.css';
+import React, { useState, useRef } from "react";
+import "./App.css";
+
+function padTime(time) {
+	return time.toString().padStart(2, "0");
+}
 
 export default function App() {
-  return (
-    <div className="app">
-      <h2>Pomodoro!</h2>
+	const [title, setTitle] = useState("Let the coundtown begin!!!");
+	const [timeLeft, setTimeLeft] = useState(25 * 60);
+	const [isRunning, setIsRunning] = useState(false);
+	const intervalRef = useRef(null);
 
-      <div className="timer">
-        <span>00</span>
-        <span>:</span>
-        <span>00</span>
-      </div>
+	function startTimer() {
+		setTitle("You're doing great!!");
+		setIsRunning(true);
+		intervalRef.current = setInterval(() => {
+			setTimeLeft((timeLeft) => {
+				if (timeLeft >= 1) return timeLeft - 1;
 
-      <div className="buttons">
-        <button>Start</button>
-        <button>Stop</button>
-        <button>Reset</button>
-      </div>
-    </div>
-  );
+				resetTimer();
+				return 0;
+			});
+		}, 1000);
+	}
+
+	function stopTimer() {
+		clearInterval(intervalRef.current);
+		setTitle("Keep it up!");
+		setIsRunning(false);
+	}
+
+	function resetTimer() {
+		clearInterval(intervalRef.current);
+		setTitle("Ready to go another round?");
+		setTimeLeft(25 * 60);
+		setIsRunning(false);
+	}
+
+	const minutes = padTime(Math.floor(timeLeft / 60));
+	const seconds = padTime(timeLeft - minutes * 60);
+
+	return (
+		<div className="app">
+			<h2>{title}</h2>
+
+			<div className="timer">
+				<span>{minutes}</span>
+				<span>:</span>
+				<span>{seconds}</span>
+			</div>
+
+			<div className="buttons">
+				{!isRunning && <button onClick={startTimer}>Start</button>}
+				{isRunning && <button onClick={stopTimer}>Stop</button>}
+				{isRunning && <button onClick={resetTimer}>Reset</button>}
+			</div>
+		</div>
+	);
 }
